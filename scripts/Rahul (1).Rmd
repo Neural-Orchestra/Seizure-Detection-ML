@@ -1,15 +1,26 @@
 ---
-title: "Predictive Modeling of Epileptic Seizure Detection Using Machine Learning"
-author: "Rahul Chhinparia"
+title: |
+  \Huge Capstone: Predictive Modeling of Epileptic Seizure Detection
+
+  \Large (using Machine Learning)
+
+subtitle: "HarvardX Data Science Project"
+
+author: "Rahul Chhinparia, M.Sc."
+
 date: "2026-05-11"
+
 output:
   pdf_document:
     toc: true
     number_sections: false
     fig_caption: true
+    latex_engine: xelatex
+
   html_document:
     toc: true
     df_print: paged
+
   word_document:
     toc: true
 ---
@@ -17,7 +28,12 @@ output:
 
 
 ```{r setup, include=FALSE, message=FALSE, warning=FALSE}
-knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE, fig.crop = FALSE)
+knitr::opts_chunk$set(
+  echo = TRUE,
+  message = FALSE,
+  warning = FALSE,
+  fig.crop = FALSE
+)
 ```
 
 # 1. Introduction
@@ -222,6 +238,8 @@ cm_xgb
 
 The XGBoost model's boosting mechanism and its capacity to learn complex patterns in the EEG signal contributed to achieving high seizure detection performance.
 
+\newpage
+
 ## 2.9 Model Comparison
 ```{r}
 get_metrics <- function(cm){
@@ -306,6 +324,8 @@ Nonetheless, the main weakness is the inter-patient variability of EEG signals, 
 This study will help develop intelligent seizure detection systems with the application of machine learning techniques. Based on the results, the researchers believe that machine learning could help neurologists to more rapidly and accurately identify seizures from EEG signals.
 
 Future studies should explore frequency domain-based methods such as Fourier Transform and Wavelet analysis and model calibration to gain a better understanding of more neurological phenomena and to improve clinical reliability.
+
+\newpage
 
 # 5. References
 

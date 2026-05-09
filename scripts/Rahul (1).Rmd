@@ -1,25 +1,46 @@
 ---
 title: "Predictive Modeling of Epileptic Seizure Detection Using Machine Learning"
-author: "Rahul Rajput"
-date: "2026-04-16"
+author: "Rahul Chhinparia"
+date: "2026-05-09"
 output:
-  pdf_document: default
+  pdf_document:
+    toc: true
+    number_sections: false
+    fig_caption: true
   html_document:
+    toc: true
     df_print: paged
-  word_document: default
+  word_document:
+    toc: true
 ---
 
-```{r setup, include=FALSE , message=FALSE, warning=FALSE}
-knitr::opts_chunk$set(echo = TRUE, fig.crop = FALSE)
+
+
+```{r setup, include=FALSE, message=FALSE, warning=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE, fig.crop = FALSE)
 ```
 
 # 1. Introduction
 
-The dataset that is used in this study is BEED of UCI repository, which includes EEG signal attributes (X1 -X16) and a target variable (y) that is a measure of seizure activity. The objective is to make predictive models that are capable of correctly classifying seizure and non-seizure cases to assist in clinical decision-making. 
+Epileptic seizure detection is the one of the most crucial tasks of diagnosing neurological disorders and is a challenge with manual EEG interpretation due to the high manual workload and the need for expert knowledge. The doctor can make use of the machine learning algorithms to automatically detect the pattern of the seizure on the EEG signal and thus improve the efficiency of the diagnosis process and reduce the human errors.
+
+The dataset that is used in this study is BEED of UCI repository, which includes EEG signal attributes (X1 -X16) and a target variable (y) that is a measure of seizure activity. The goal is to develop predictive models that can accurately categorize seizure and non-seizure patients for aiding clinical decision making. 
+
+The study takes the following steps:
+
+1. Loading and preprocessing EEG signal data.
+2. Exploring EEG feature distributions and relationships.
+3. Splitting the dataset into training and testing sets.
+4. Machine learning classification models development.
+5. Evaluating model performance using standard metrics.
+6. Comparing the predictive performance of all models.
 
 # 2. Methods and Analysis
 The data set was initially purged of any missing data to allow proper analysis and the target variable was turned into a simple binary data (seizure vs non-seizure) to facilitate classification. This was followed by dividing the data into 80 percent training and 20 percent testing, which will enable the model to learn efficiently and also to evaluate the performance on the unseen data fairly. This study employed three models: Logistic Regression as an interpretable and simple baseline, Random Forest to learn the intricate trends in the data, and XGBoost to have a better prediction performance due to the use of advanced boosting models.
+
 Logistic Regression was employed as a baseline because it is simple and easy to interpret. Random Forest was chosen because it assumes the presence of non-linear relationships, and the ability to handle features that are correlated with each other, without involving feature scaling. XGBoost was added to test the hypothesis of whether gradient boosting algorithms could further improve predictive accuracy by sequential learning.
+
+The methodology used in this study consists of data pre-processing, exploratory data analysis, creation of machine learning models, and performance assessment. The features of EEG signals were analysed using pattern recognition techniques to detect patterns related to seizures. Three machine learning models were developed and evaluated using classification performance indicators.
 
 ## 2.1 Libraries
 
@@ -32,6 +53,9 @@ library(xgboost)
 library(pROC)
 library(knitr)
 ```
+
+Data handling, visualization, development of machine learning models and data evaluation were performed using the above libraries. For model training and confusion matrix, the caret package was employed and for ensemble learning approaches ranger and xgboost package was employed.
+
 
 ## 2.2 Load Data
 
@@ -46,6 +70,18 @@ if (!file.exists(file_path)) {
 }
 ```
 
+## Dataset Description
+The BEED dataset is a dataset of EEG signal measurements from the UCI Machine Learning Repository for epilepsy analysis (UCI Machine Learning Repository, 2025). The network is provided with data consisting of 16 numerical features derived from EEG signals (X1 to X16) and the target variable indicating seizure data. The EEG signals are useful for analysis of seizures as abnormal electrical activity in the brain is commonly associated with epileptic seizures.
+
+## Basic Structure
+```{r}
+str(df)
+dim(df)
+summary(df)
+```
+
+The structure analysis of the dataset gives information on the number of observations, the type of features, and the distribution of the EEG variables. It is important to have an understanding of the structure of the dataset prior to predictive modelling, as it can be used to identify characteristics of features and data quality problems.
+
 ## 2.3 Preprocessing
 
 ```{r, message=FALSE, warning=FALSE, echo=FALSE}
@@ -53,6 +89,8 @@ df <- na.omit(df)
 df$y <- ifelse(df$y == 1, 1, 0)
 df$y <- as.factor(df$y)
 ```
+
+Data was cleaned up by removing missing values to ensure data quality and accuracy for the models. The target variable was binary coded with seizure cases being coded 1 and non-seizure cases coded 0. The classification problem is simplified by binary transformation, and is suitable for supervised machine learning algorithms..
 
 ## 2.4 Data Visualization
 
@@ -64,12 +102,17 @@ ggplot(df, aes(x = y)) +
   ggtitle("Class Distribution")
 ```
 
+The class distribution graph depicts the distribution of observations in the data set, including both the number of observations in each class and the number of observations that are not in any class. A well-balanced class representation is essential as the model's learning and prediction may be impacted by extremely imbalanced data.
+
+
 ### Histogram
 
 ```{r, message=FALSE, warning=FALSE, echo=FALSE}
 ggplot(df, aes(x = X1, fill = y)) +
   geom_histogram(bins = 30)
 ```
+
+The distribution of EEG feature X1 for the classes of seizures is presented in the form of a histogram. The overlapping distributions show that there is a need to develop models that are able to learn complex nonlinear EEG signal relationships to classify seizures.
 
 ### Boxplot
 
@@ -78,7 +121,11 @@ ggplot(df, aes(x = y, y = X2)) +
   geom_boxplot()
 ```
 
+Boxplot analysis shows that the median and spread of x2 is different in EEG features between the seizure and non-seizure groups. Outliers could indicate abnormal patterns of neurological activity that accompany epileptic seizures.
+
 ### Correlation Heatmap
+
+Correlation analysis was used to investigate relationships between EEG signal characteristics. High correlation between variables can be a sign of redundant information and multicollinearity.
 
 ```{r, message=FALSE, warning=FALSE, echo=FALSE}
 cor_matrix <- cor(df[,1:16])
@@ -94,6 +141,7 @@ ggplot(cor_df, aes(Var1, Var2, fill = Freq)) +
   ggtitle("Correlation Heatmap with Values") +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 ```
+
 Correlation heatmap reveals that there are moderate to high correlation coefficients between a number of EEG features, indicating the redundancy in signal characteristics. This justifies the use of tree-based models such as Random Forest which is resistant to multicollinearity and capable of effectively capturing complex interactions between features.
 
 ## 2.5 Train-Test Split
@@ -104,9 +152,13 @@ trainIndex <- createDataPartition(df$y, p = 0.8, list = FALSE)
 train <- df[trainIndex,]
 test <- df[-trainIndex,]
 ```
-Stratified sampling to maintain the distribution of classes was used to divide the dataset into 80% training and 20% testing. This will ensure that the models are trained using adequate data and yet they are reliably evaluated using unknown samples.
+
+Stratified sampling to maintain the distribution of classes was used to divide the dataset into 80% training and 20% testing. This will ensure that the models are trained using adequate data and yet they are reliably evaluated using unknown samples. The use of stratified sampling ensures that the seizure and non-seizure class distributions remain consistent in both training and testing datasets. This improves the fairness and reliability of model evaluation.
 
 ## 2.6 Logistic Regression
+
+Logistic Regression was used as a baseline classification model because of its simplicity and interpretability. The model's job is to predict the probability of a seizure by a linear combination of features seen in the EEG.
+
 
 ```{r, message=FALSE, warning=FALSE, echo=FALSE}
 model_lr <- train(y ~ ., data = train, method = "glm", family = "binomial")
@@ -115,7 +167,11 @@ cm_lr <- confusionMatrix(pred_lr, test$y)
 cm_lr
 ```
 
+The Logistic Regression model gave moderate classification performance. The relationships between EEG signals may be nonlinear, and linear models might not be able to capture complex relationships during seizures.
+
 ## 2.7 Random Forest
+
+Random Forest is a type of ensemble learning that involves the creation of several decision trees, each trained on a randomly selected subset of the data, and then the results of these trees are combined to make the final prediction (Schonlau, 2023). It is very effective for data sets that are not linear or are structured.
 
 ```{r, message=FALSE, warning=FALSE, echo=FALSE}
 model_rf <- ranger(y ~ ., data = train)
@@ -124,7 +180,11 @@ cm_rf <- confusionMatrix(pred_rf, test$y)
 cm_rf
 ```
 
+The Random Forest model was effective in predicting the signal as it could model nonlinear interactions between the EEG signals and it was also effective in handling correlated features.
+
 ## 2.8 XGBoost
+
+XGBoost is a sequential optimization of model performance by fixing the prediction errors of the model generated by the previously added trees, a gradient boosting algorithm (Zhang et al., 2022). It is commonly used due to its great prediction accuracy and computation efficiency.
 
 ```{r, message=FALSE, warning=FALSE, echo=FALSE}
 
@@ -160,13 +220,16 @@ cm_xgb <- confusionMatrix(pred_xgb, test$y)
 cm_xgb
 ```
 
+The XGBoost model's boosting mechanism and its capacity to learn complex patterns in the EEG signal contributed to achieving high seizure detection performance.
+
 ## 2.9 Model Comparison
 ```{r}
 get_metrics <- function(cm){
   c(
     Accuracy = as.numeric(cm$overall["Accuracy"]),
     Precision = as.numeric(cm$byClass["Precision"]),
-    Recall = as.numeric(cm$byClass["Recall"])
+    Recall = as.numeric(cm$byClass["Recall"]),
+    F1_Score = as.numeric(cm$byClass["F1"])
   )
 }
 
@@ -178,7 +241,7 @@ results <- data.frame(
 knitr::kable(results, caption = "Model Comparison Table")
 ```
 
-The comparison reveals that Logistic Regression does not perform well because it has linear assumptions resulting in increased misclassification. Conversely, Random Forest has better performance because it models complex patterns of EEG. The generalization capability is high as indicated by high accuracy and balanced values of precision-recall.
+The comparison shows that Logistic Regression is not doing good job because it has linear assumptions, which leads to a higher misclassification rate. In contrast, the performance of Random Forest is better, as it models complex patterns of EEG. The generalization capability is high as indicated by high accuracy and balanced values of precision-recall.
 
 ## 2.10 Result Visualization
 
@@ -188,30 +251,68 @@ ggplot(results, aes(x = Model, y = Recall)) +
   ggtitle("Model Comparison")
 ```
 
+The comparison graph visually shows the difference in the performance of the model recall. The detection of a seizure event is particularly important when the recall rate is high, as a missed seizure event can have serious clinical consequences.
+
 ## 2.11 Evaluation Metric
 
 The performance of the classification models is evaluated using Accuracy:
+
+## Evaluation Metrics
+
+The performance of the machine learning models was evaluated using Accuracy, Precision, Recall, and F1-score.
 
 $$
 Accuracy = \frac{TP + TN}{TP + TN + FP + FN}
 $$
 
+Accuracy measures the proportion of correctly classified seizure and non-seizure cases.
+
+$$
+Precision = \frac{TP}{TP + FP}
+$$
+
+Precision measures the proportion of predicted seizure cases that were correctly classified.
+
+$$
+Recall = \frac{TP}{TP + FN}
+$$
+
+Recall measures the ability of the model to correctly identify actual seizure cases.
+
+$$
+F1 = 2 \times \frac{Precision \times Recall}{Precision + Recall}
+$$
+
+F1-score provides a balanced measure of precision and recall.
+
 where TP = True Positives, TN = True Negatives, FP = False Positives, and FN = False Negatives.
 
 
 # 3. Results
+The performance of the seizure classification models obtained by ensemble learning shows better performance than Logistic regression model. The accuracy of the Random Forest model was 98.00% with a Precision of 97.79%, Recall of 99.58% and F1 score of 98.68%. This means that Random Forest showed a very good performance at accurately recognizing seizure versus non-seizure cases and had a well-balanced predictive performance.
 
-The results show that Random Forest achieved the highest accuracy (98.18%), followed by XGBoost (97.43%). Logistic Regression did worse (79.12%), which means that the nonlinear models are more adequate to EEG-based seizure detection.
+For classification, XGBoost also performed well with an accuracy of 97.43%, precision of 97.54%, recall of 99.08%, and F1-score of 98.30%. Through the boosting mechanism, XGBoost was able to extract the pattern of the EEG signal well when it is complex and nonlinear.
+
+The comparatively poor performance was for Logistic Regression with accuracy of 79.06% and F1 score of 87.29%. The model had good recall but not a high enough precision or accuracy, indicating that making linear assumptions was less appropriate for modelling the complex relationships found in EEG signal data.
+
+Overall, the results show that ensemble-based machine learning models like Random Forest and XGBoost are very effective for epileptic seizure detection tasks.
 
 # 4. Conclusion
 
-This study demonstrates that machine learning models can effectively detect epileptic seizures using EEG data. The highest accuracy of the evaluated models was shown to be random forest (~98%), which means that this model could be used in clinical decision support systems.
+The results presented in this study show that machine learning models are able to accurately identify epileptic seizures from EEG signals. The highest accuracy of the evaluated models was shown to be random forest (~98%), which means that this model could be used in clinical decision support systems.
 
-Nonetheless, the main weakness is the inter-patient variability of EEG signals, which can impact model generalization in real-world implementation. Moreover, the paper is based solely on time-domain features.
+Nonetheless, the main weakness is the inter-patient variability of EEG signals, which can impact model generalization in real-world implementation. Furthermore, the paper is founded uniquely on the features in the time domain.
 
-Future research should aim to include frequency-domain analyses like Fourier Transform and Wavelet analysis in order to capture deeper neurological patterns and to calibrate person-specific models to enhance clinical reliability.
+This study will help develop intelligent seizure detection systems with the application of machine learning techniques. Based on the results, the researchers believe that machine learning could help neurologists to more rapidly and accurately identify seizures from EEG signals.
+
+Future studies should explore frequency domain-based methods such as Fourier Transform and Wavelet analysis and model calibration to gain a better understanding of more neurological phenomena and to improve clinical reliability.
 
 # 5. References
 
 UCI Machine Learning Repository (2025). BEED: Bangalore EEG Epilepsy Dataset. 
-Available at: https://archive.ics.uci.edu/dataset/1134/beed:+bangalore+eeg+epilepsy+dataset. 
+Available at: https://archive.ics.uci.edu/dataset/1134/beed:+bangalore+eeg+epilepsy+dataset
+
+Schonlau, M., 2023. Random forests. In Applied statistical learning: with case studies in Stata (pp. 183-204). Cham: Springer International Publishing.
+
+Zhang, P., Jia, Y. and Shang, Y., 2022. Research and application of XGBoost in imbalanced data. International Journal of Distributed Sensor Networks, 18(6), p.15501329221106935.
+
